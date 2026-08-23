@@ -869,10 +869,11 @@ const position_prototype = {
 			if (c >= "a" && c <= "h") {
 				startx = c.charCodeAt(0) - 97;
 				endx = startx;
-			}
-			if (c >= "1" && c <= "8") {
+			} else if (c >= "1" && c <= "8") {
 				starty = 7 - (c.charCodeAt(0) - 49);
 				endy = starty;
+			} else {
+				return ["", `bad character: "${c}"`];
 			}
 		}
 
