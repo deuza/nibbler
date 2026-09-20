@@ -57,6 +57,49 @@ body {
 	z-index: 1;
 }
 
+/* Square coordinates, shown when #boardsquares has the "coordinates" class,
+   which hub.set_coordinates() sets from config.coordinates.
+
+   Each square is a <td> carrying its own data-coord attribute, set when the
+   board is built. A flip moves the elements themselves rather than renaming
+   them, so each label stays with its own square.
+
+   The colour is chosen from the :nth-child position rather than the square
+   name, because the shading comes from the table background and so follows
+   the visible layout: the top left square is light in both orientations. */
+
+#boardsquares {
+	--coord-size: 14px;
+	--coord-inset: 4px;
+	--coord-on-light: rgba(0, 0, 0, 0.6);
+	--coord-on-dark: rgba(255, 255, 255, 0.8);
+}
+
+#boardsquares td {
+	position: relative;					/* positioning context for the label */
+}
+
+#boardsquares.coordinates td::after {
+	content: attr(data-coord);
+	position: absolute;
+	left: var(--coord-inset);
+	top: var(--coord-inset);
+	font: bold var(--coord-size) monospace;
+	line-height: 1;
+	pointer-events: none;				/* never steal a click from the board */
+	z-index: 2;
+}
+
+#boardsquares.coordinates tr:nth-child(odd) td:nth-child(odd)::after,
+#boardsquares.coordinates tr:nth-child(even) td:nth-child(even)::after {
+	color: var(--coord-on-light);
+}
+
+#boardsquares.coordinates tr:nth-child(odd) td:nth-child(even)::after,
+#boardsquares.coordinates tr:nth-child(even) td:nth-child(odd)::after {
+	color: var(--coord-on-dark);
+}
+
 #canvas {
 	grid-area: a;
 	margin: 1em 0 0 1em;

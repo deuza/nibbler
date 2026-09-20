@@ -59,6 +59,7 @@ for (let y = 0; y < 8; y++) {
 		let td2 = document.createElement("td");
 		td1.id = "underlay_" + S(x, y);
 		td2.id = "overlay_" + S(x, y);
+		td1.dataset.coord = S(x, y);				// Used by the CSS coordinate labels.
 		td1.width = td2.width = config.square_size;
 		td1.height = td2.height = config.square_size;
 		tr1.appendChild(td1);
@@ -68,6 +69,8 @@ for (let y = 0; y < 8; y++) {
 		});
 	}
 }
+
+hub.set_coordinates();
 
 statusbox.style["font-size"] = config.info_font_size.toString() + "px";
 infobox.style["font-size"] = config.info_font_size.toString() + "px";

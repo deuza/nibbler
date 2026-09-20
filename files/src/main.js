@@ -1057,6 +1057,17 @@ function menu_build() {
 					type: "separator"
 				},
 				{
+					label: translate.t("Coordinates"),
+					type: "checkbox",
+					checked: config.coordinates,
+					click: () => {
+						win.webContents.send("call", {
+							fn: "toggle",
+							args: ["coordinates"],
+						});
+					}
+				},
+				{
 					label: translate.t("Arrows"),
 					type: "checkbox",
 					checked: config.arrows_enabled,
