@@ -2213,7 +2213,7 @@ let hub_props = {
 	},
 
 	set_coordinates: function() {					// Applies config.coordinates to the board.
-		boardsquares.classList.toggle("coordinates", config.coordinates ? true : false);
+		boardfriends.classList.toggle("coordinates", config.coordinates ? true : false);
 	},
 
 	toggle_flip: function() {						// config.flip should not be directly set, call this function instead.
