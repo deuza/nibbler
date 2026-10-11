@@ -194,6 +194,12 @@ function startup() {
 		set_one_check(msg ? true : false, "Engine", "Choose engine...");
 	});
 
+	electron.ipcMain.on("set_clipboard_text", (event, text) => {
+		if (typeof text === "string") {
+			electron.clipboard.writeText(text);
+		}
+	});
+
 	electron.ipcMain.on("ack_logfile", (event, msg) => {
 		set_one_check(msg ? true : false, "Dev", "Logging", "Use logfile...");
 	});
@@ -399,9 +405,12 @@ function menu_build() {
 					label: translate.t("Load FEN / PGN from clipboard"),
 					accelerator: "CommandOrControl+Shift+V",
 					click: () => {
-						win.webContents.send("call", {
-							fn: "load_fen_or_pgn_from_string",
-							args: [electron.clipboard.readText()]
+						// electron.clipboard.readText() may or may not return a promise (Electron 44+ does)
+						Promise.resolve(electron.clipboard.readText()).then((s) => {
+							win.webContents.send("call", {
+								fn: "load_fen_or_pgn_from_string",
+								args: [s]
+							});
 						});
 					}
 				},

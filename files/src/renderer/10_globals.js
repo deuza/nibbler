@@ -34,7 +34,6 @@ try {
 
 const background = require("./modules/background");
 const child_process = require("child_process");
-const clipboard = require("electron").clipboard;
 const config_io = require("./modules/config_io");
 const custom_uci = require("./modules/custom_uci");
 const engineconfig_io = require("./modules/engineconfig_io");
@@ -48,6 +47,13 @@ const readline = require("readline");
 const stringify = require("./modules/stringify");
 const translate = require("./modules/translate");
 const util = require("util");
+
+// From v44 electron.clipboard is no longer available in the renderer process. We only used it for
+// writeText(). Now it's no longer used; we'll just send text to the main process and let it do it.
+
+const clipboard_write = (s) => {
+	if (typeof s === "string") ipcRenderer.send("set_clipboard_text", s);
+};
 
 // Prior to v32, given a file object from an event (e.g. from dragging the file onto the window)
 // we could simply access its path, but afterwards we need to use a helper function...
