@@ -6,7 +6,7 @@ Ce dépôt est un fork maintenu de [rooklift/nibbler](https://github.com/rooklif
 
 Vous y retrouvez le même Nibbler, avec les mêmes menus, les mêmes raccourcis clavier et les mêmes fichiers de réglages, avec en plus :
 
-* un **Electron à jour** : 44.7.0, alors que les versions officielles embarquent toujours Electron 9.4.4, qui n'est plus maintenu depuis mars 2021 ;
+* un **Electron à jour** : 44.11.5, alors que les versions officielles embarquent toujours Electron 9.4.4, qui n'est plus maintenu depuis mars 2021 ;
 * une **barre d'évaluation** à côté de l'échiquier ;
 * les **coordonnées** sur l'échiquier ;
 * des **évaluations qui survivent à l'enregistrement et à la réouverture d'un PGN** (`[%eval]`) ;
@@ -25,12 +25,12 @@ Nibbler est une application Electron : Electron embarque le moteur de navigateur
 
 | | Nibbler officiel (Windows, Linux) | Ce fork |
 | --- | --- | --- |
-| Electron | 9.4.4 | 44.7.0 |
-| Chromium | 83.0.4103.122 | 152.0.7977.130 |
-| Node.js | 12.14.1 | 24.21.0 |
+| Electron | 9.4.4 | 44.11.5 |
+| Chromium | 83.0.4103.122 | 152.0.7977.169 |
+| Node.js | 12.14.1 | 24.22.3 |
 | Support | [terminé le 3 mars 2021](https://releases.electronjs.org/release/v9.4.4) | Branche Electron 44 [maintenue jusqu'au 2 mars 2027](https://endoflife.date/electron) |
 
-Electron 9 ne reçoit plus aucune correction, y compris de sécurité. Dans ce fork, `builder.py` construit les versions Windows et Linux avec Electron 44.7.0. Cette version a été testée sous Windows 11, Debian Trixie et macOS sur Apple Silicon, analyse avec Lc0 comprise.
+Electron 9 ne reçoit plus aucune correction, y compris de sécurité. Dans ce fork, `builder.py` construit les versions Windows et Linux avec Electron 44.11.5. Cette version a été testée sous Windows 11, Debian Trixie et macOS sur Apple Silicon, analyse avec Lc0 comprise.
 
 Electron 44 demande un système 64 bits (x64 ou arm64), macOS 13 (Ventura) ou plus récent ([notes de version d'Electron 44](https://electronjs.org/blog/electron-44-0)), et Windows 10 ou plus récent ([Electron et Windows 7/8/8.1](https://electronjs.org/blog/windows-7-to-8-1-deprecation-notice)).
 
@@ -93,7 +93,7 @@ Tout ce qui précède a été proposé au projet officiel sous forme de pull req
 | Pull request | Objet | État dans le dépôt officiel |
 | --- | --- | --- |
 | [#295](https://github.com/rooklift/nibbler/pull/295) | Coordonnées | Ouverte : retravaillée à la demande du mainteneur, sans réponse depuis |
-| [#299](https://github.com/rooklift/nibbler/pull/299) | Electron 44.7.0 sur toutes les plateformes | Ouverte, aucune revue |
+| [#299](https://github.com/rooklift/nibbler/pull/299) | Electron 44 sur toutes les plateformes (désormais 44.11.5) | Ouverte, aucune revue |
 | [#301](https://github.com/rooklift/nibbler/pull/301) | Livre d'ouverture rechargé au démarrage | Ouverte, aucune revue |
 | [#302](https://github.com/rooklift/nibbler/pull/302) | `[%eval]` dans le PGN enregistré | Ouverte, aucune revue |
 | [#303](https://github.com/rooklift/nibbler/pull/303) | Barre d'évaluation | Ouverte, aucune revue |
@@ -108,7 +108,7 @@ Le fork suit le dépôt officiel : chaque modification apportée au Nibbler offi
 
 Des paquets prêts à l'emploi pour Windows, Linux et macOS seront publiés dans la section Releases de ce dépôt.
 
-En attendant, vous pouvez le lancer depuis les sources. Installez Electron 44.7.0 (par exemple `npm install -g electron@44.7.0`), puis :
+En attendant, vous pouvez le lancer depuis les sources. Installez Electron 44.11.5 (par exemple `npm install -g electron@44.11.5`), puis :
 
 ```bash
 git clone https://github.com/deuza/nibbler.git
