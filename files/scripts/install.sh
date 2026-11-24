@@ -65,7 +65,7 @@ INSTALL_DIR="/opt/nibbler"
 if [[ -d "${INSTALL_DIR}" ]]; then
     echo "${INSTALL_DIR} already exists!"
     echo "It looks like there is an existing installation of Nibbler on your system"
-    read -p "Would you like to overwrite it? [y/n]" -n 1 CONFIRM_INSTALL
+    read -r -p "Would you like to overwrite it? [y/n]" -n 1 CONFIRM_INSTALL
     echo
     if ! [[ "$CONFIRM_INSTALL" =~ ^[Yy]$ ]]; then
         echo "Aborting"
@@ -88,7 +88,7 @@ echo "This will require sudo privilege."
 for FILE in "${INSTALL_DIR}" "${BIN_SYMLINK_PATH}" "${DESKTOP_ENTRY_PATH}" \
     "${ICON_PNG_PATH}" "${ICON_SVG_PATH}"; do
     sudo rm -rf "$FILE"
-    sudo mkdir -p $(dirname "$FILE")
+    sudo mkdir -p "$(dirname "$FILE")"
 done
 
 # install new

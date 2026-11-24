@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - README: what gpg's warning about an uncertified key means when verifying a release, and how to certify the key locally.
 
+### Fixed
+
+- `install.sh`: two warnings from shellcheck, inherited from upstream: the overwrite prompt uses `read -r`, and the folders to create are quoted.
+- `install_mac.sh`: with the bash 3.2 of macOS, the progress messages showed `✔` instead of a check mark; they now show `OK`.
+
 ## [3.0.0] - 2026-11-24
 
 First release of this fork, with its own version numbers from now on. It is based on the official Nibbler (rooklift/nibbler) as of commit 772a023, whose last release is 2.5.8; every change listed here is relative to that release.

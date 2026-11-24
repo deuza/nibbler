@@ -7,7 +7,7 @@ msg() {
 }
 
 ok() {
-	printf "\033[92m \u2714 %s\033[0m\n" "$1"
+	printf "\033[92m OK %s\033[0m\n" "$1"
 }
 
 WORKDIR="/tmp/nibbler-install"
