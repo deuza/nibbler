@@ -11,7 +11,8 @@ Vous y retrouvez le même Nibbler, avec les mêmes menus, les mêmes raccourcis 
 * les **coordonnées** sur l'échiquier ;
 * des **évaluations qui survivent à l'enregistrement et à la réouverture d'un PGN** (`[%eval]`) ;
 * le **livre d'ouverture rechargé au démarrage** ;
-* deux **corrections de l'export PGN**.
+* deux **corrections de l'export PGN** ;
+* des **versions vérifiables** : archives construites de façon reproductible, avec des sommes de contrôle signées par la clé OpenPGP du mainteneur.
 
 **Toutes les nouvelles fonctionnalités sont optionnelles et désactivées par défaut.** À l'installation, ce fork a l'apparence et le comportement du Nibbler officiel : vous activez depuis les menus ce qui vous intéresse, et rien d'autre ne change.
 
@@ -106,19 +107,63 @@ Le fork suit le dépôt officiel : chaque modification apportée au Nibbler offi
 
 ## Installation
 
-Des paquets prêts à l'emploi pour Windows, Linux et macOS seront publiés dans la section Releases de ce dépôt.
+Les archives sont jointes à chaque version, dans la section Releases de ce dépôt. Pour la version 3.0.0 :
 
-En attendant, vous pouvez le lancer depuis les sources. Installez Electron 44.11.5 (par exemple `npm install -g electron@44.11.5`), puis :
+* **Windows** : `nibbler-3.0.0-windows.zip`. Extrayez-la où vous voulez et lancez `nibbler.exe`.
+* **Linux** : `nibbler-3.0.0-linux.tar.gz`. Extrayez-la avec `tar -xzf nibbler-3.0.0-linux.tar.gz` et lancez `nibbler-3.0.0-linux/nibbler`. Vous pouvez aussi lancer `bash files/scripts/install.sh` depuis un clone de ce dépôt : il télécharge la dernière version, la vérifie contre la liste signée des sommes de contrôle de la version, et l'installe dans `/opt/nibbler` avec une entrée de menu (il demande `sudo`).
+* **macOS** : il n'y a pas d'application prête à l'emploi, car macOS bloque une application non signée téléchargée telle quelle. `bash files/scripts/install_mac.sh`, lancé depuis un clone de ce dépôt, construit `Nibbler.app` sur votre Mac à partir des sources de la version et de l'Electron officiel, dont il vérifie l'archive contre la liste des sommes de contrôle d'Electron.
+
+Le fork utilise le même dossier de réglages que le Nibbler officiel : vos fichiers `config.json` et `engines.json` existants (moteurs, réseaux, options) sont repris tels quels.
+
+Pour le lancer directement depuis les sources, installez Electron 44.11.5 (par exemple `npm install -g electron@44.11.5`), puis lancez `electron .` dans `files/src`.
+
+## Vérifier une version
+
+Ne faites pas confiance, vérifiez. Chaque version est accompagnée de `SHA256SUMS`, la liste des sommes de contrôle de ses archives, et de `SHA256SUMS.asc`, la signature de cette liste par la clé OpenPGP du mainteneur :
+
+```text
+root@deuza.net
+F04C 74F3 6625 0DE2 A309  1E46 A91A D62A 5CB8 9279
+```
+
+C'est aussi la clé qui signe les commits et les tags de ce dépôt. Elle est publiée dans le Web Key Directory de deuza.net. Dans le dossier où vous avez téléchargé les fichiers de la version :
+
+```bash
+gpg --auto-key-locate clear,wkd,nodefault --locate-external-keys root@deuza.net
+gpg --verify SHA256SUMS.asc SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS
+```
+
+`gpg --verify` doit annoncer une signature valide de `root@deuza.net`, faite par la clé dont l'empreinte figure ci-dessus, et `sha256sum` doit afficher `OK` pour l'archive que vous avez téléchargée. Sous Windows, `Get-FileHash nibbler-3.0.0-windows.zip -Algorithm SHA256` dans PowerShell donne la somme à comparer avec la ligne de `SHA256SUMS`, et Gpg4win fournit `gpg`.
+
+## Construire votre propre version
+
+Vous n'êtes pas non plus obligé de croire les archives sur parole : vous pouvez les construire vous-même, à partir du tag signé, et comparer.
 
 ```bash
 git clone https://github.com/deuza/nibbler.git
-cd nibbler/files/src
-electron .
+cd nibbler
+git verify-tag v3.0.0
+git checkout v3.0.0
+sh files/scripts/release.sh
 ```
 
-Pour construire une version autonome, reportez-vous aux commentaires de `files/scripts/builder.py`.
+`git verify-tag` vérifie que le tag a été signé par la clé ci-dessus. `files/scripts/release.sh` ensuite :
 
-Le fork utilise le même dossier de réglages que le Nibbler officiel : vos fichiers `config.json` et `engines.json` existants (moteurs, réseaux, options) sont repris tels quels.
+* télécharge les archives officielles d'Electron indiquées dans `files/scripts/builder.py`, et les vérifie contre la liste des sommes de contrôle d'Electron ;
+* refuse de construire si `files/src` ou `files/res` diffèrent en quoi que ce soit du commit ;
+* lance `builder.py`, puis crée les archives et leur `SHA256SUMS` dans `files/scripts/dist`, avec toutes les dates fixées à celle du commit et des droits, un ordre des fichiers et des propriétaires normalisés.
+
+Construites avec les mêmes outils (GNU tar, gzip et zip d'Info-ZIP), vos archives sont identiques aux archives publiées, octet pour octet : les deux fichiers `SHA256SUMS` sont donc identiques eux aussi. Si vos versions de ces outils produisent une archive différente, comparez plutôt les contenus, qui doivent être identiques quels que soient les outils :
+
+```bash
+mkdir publiee locale
+tar -xzf /chemin/vers/nibbler-3.0.0-linux.tar.gz -C publiee
+tar -xzf files/scripts/dist/nibbler-3.0.0-linux.tar.gz -C locale
+diff -r publiee locale && echo "Contenus identiques"
+```
+
+Le script a besoin de `git`, `curl`, `sha256sum`, `python3`, `zip`, de GNU `tar` et de `gzip` ; il est écrit pour un shell POSIX et a été utilisé sous Debian et Ubuntu.
 
 ## Crédits
 

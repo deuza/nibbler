@@ -11,7 +11,8 @@ It is the same Nibbler, with the same menus, keyboard shortcuts and settings fil
 * **board coordinates**;
 * **evaluations that survive saving and reopening a PGN** (`[%eval]`);
 * the **opening book reloaded at startup**;
-* two **fixes to the PGN export**.
+* two **fixes to the PGN export**;
+* **releases you can verify**: archives built in a reproducible way, with checksums signed by the maintainer's OpenPGP key.
 
 **Every new feature is optional and off by default.** Out of the box, this fork looks and behaves like the official Nibbler: you switch on what you want from the menus, and nothing else changes.
 
@@ -106,19 +107,63 @@ The fork follows upstream: every change made to the official Nibbler is merged h
 
 ## Installation
 
-Prebuilt packages for Windows, Linux and macOS will be published in the Releases section of this repository.
+The archives are attached to each release, in the Releases section of this repository. For version 3.0.0:
 
-Meanwhile, you can run it from source. Install Electron 44.11.5 (for instance `npm install -g electron@44.11.5`), then:
+* **Windows**: `nibbler-3.0.0-windows.zip`. Extract it anywhere and run `nibbler.exe`.
+* **Linux**: `nibbler-3.0.0-linux.tar.gz`. Extract it with `tar -xzf nibbler-3.0.0-linux.tar.gz` and run `nibbler-3.0.0-linux/nibbler`. Alternatively, `bash files/scripts/install.sh` from a clone of this repository downloads the latest release, checks it against the signed list of checksums of the release, and installs it in `/opt/nibbler` with a menu entry (it needs `sudo`).
+* **macOS**: there is no prebuilt application, because macOS blocks an unsigned application downloaded as such. `bash files/scripts/install_mac.sh`, from a clone of this repository, builds `Nibbler.app` on your Mac from the sources of the release and from the official Electron, whose archive it checks against Electron's list of checksums.
+
+The fork uses the same settings folder as the official Nibbler, so your existing `config.json` and `engines.json` (engines, weights, options) are picked up as they are.
+
+To run it straight from the sources instead, install Electron 44.11.5 (for instance `npm install -g electron@44.11.5`), then run `electron .` in `files/src`.
+
+## Verifying a release
+
+Don't trust, verify. Each release comes with `SHA256SUMS`, the list of the checksums of its archives, and `SHA256SUMS.asc`, the signature of that list by the maintainer's OpenPGP key:
+
+```text
+root@deuza.net
+F04C 74F3 6625 0DE2 A309  1E46 A91A D62A 5CB8 9279
+```
+
+This is also the key that signs the commits and the tags of this repository. It is published in the Web Key Directory of deuza.net. In the folder where you downloaded the files of the release:
+
+```bash
+gpg --auto-key-locate clear,wkd,nodefault --locate-external-keys root@deuza.net
+gpg --verify SHA256SUMS.asc SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS
+```
+
+`gpg --verify` must report a good signature from `root@deuza.net`, made by the key whose fingerprint is shown above, and `sha256sum` must report `OK` for the archive you downloaded. On Windows, `Get-FileHash nibbler-3.0.0-windows.zip -Algorithm SHA256` in PowerShell gives the checksum to compare with the line of `SHA256SUMS`, and Gpg4win provides `gpg`.
+
+## Build it yourself
+
+You don't have to take the archives on trust either: you can build them yourself, from the signed tag, and compare.
 
 ```bash
 git clone https://github.com/deuza/nibbler.git
-cd nibbler/files/src
-electron .
+cd nibbler
+git verify-tag v3.0.0
+git checkout v3.0.0
+sh files/scripts/release.sh
 ```
 
-To build a standalone version, see the comments in `files/scripts/builder.py`.
+`git verify-tag` checks that the tag was signed by the key above. `files/scripts/release.sh` then:
 
-The fork uses the same settings folder as the official Nibbler, so your existing `config.json` and `engines.json` (engines, weights, options) are picked up as they are.
+* downloads the official Electron archives named in `files/scripts/builder.py`, and checks them against Electron's own list of checksums;
+* refuses to build if `files/src` or `files/res` differ in any way from the commit;
+* runs `builder.py`, then creates the archives and their `SHA256SUMS` in `files/scripts/dist`, with every date set to the date of the commit and with permissions, file order and owners normalised.
+
+Built with the same tools (GNU tar, gzip and Info-ZIP zip), your archives are identical to the published ones, byte for byte, so the two `SHA256SUMS` files are identical too. If your versions of these tools give a different archive, compare the contents instead; they must be identical whatever the tools:
+
+```bash
+mkdir published mine
+tar -xzf /path/to/the/downloaded/nibbler-3.0.0-linux.tar.gz -C published
+tar -xzf files/scripts/dist/nibbler-3.0.0-linux.tar.gz -C mine
+diff -r published mine && echo "Identical contents"
+```
+
+The script needs `git`, `curl`, `sha256sum`, `python3`, `zip`, GNU `tar` and `gzip`; it is written for a POSIX shell and has been used on Debian and Ubuntu.
 
 ## Credits
 
