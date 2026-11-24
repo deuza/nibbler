@@ -39,7 +39,13 @@ for key, value in zips.items():
 	# extract electron
 	print("Extracting for {}...".format(key))
 	z = zipfile.ZipFile(value, "r")
-	z.extractall(build_dir)
+	for info in z.infolist():
+		path = z.extract(info, build_dir)
+		# extractall() would drop the Unix permissions stored in the archive, leaving the Linux binary non-executable.
+		if info.create_system == 3:
+			mode = (info.external_attr >> 16) & 0o777
+			if mode:
+				os.chmod(path, mode)
 	z.close()
 
 	# rename executable
