@@ -136,6 +136,14 @@ sha256sum -c --ignore-missing SHA256SUMS
 
 `gpg --verify` doit annoncer une signature valide de `root@deuza.net`, faite par la clé dont l'empreinte figure ci-dessus, et `sha256sum` doit afficher `OK` pour l'archive que vous avez téléchargée. Sous Windows, `Get-FileHash nibbler-3.0.0-windows.zip -Algorithm SHA256` dans PowerShell donne la somme à comparer avec la ligne de `SHA256SUMS`, et Gpg4win fournit `gpg`.
 
+gpg peut ajouter un avertissement indiquant que la clé "n'est pas certifiée par une signature de confiance". Il ne concerne pas la signature, qui est valide : il signifie que rien, sur votre machine, n'atteste encore que cette clé appartient bien au mainteneur, puisque n'importe qui peut créer une clé à n'importe quel nom. C'est à cela que sert l'empreinte. Comparez celle qu'affiche gpg avec celle donnée ci-dessus, qui figure aussi dans les notes de la version. Si elles concordent et que vous avez vous-même une clé OpenPGP, vous pouvez certifier cette clé sur votre seule machine, et l'avertissement disparaît :
+
+```bash
+gpg --lsign-key F04C74F366250DE2A3091E46A91AD62A5CB89279
+```
+
+Sans clé personnelle, l'avertissement reste affiché ; une fois l'empreinte vérifiée, vous pouvez l'ignorer.
+
 ## Construire votre propre version
 
 Vous n'êtes pas non plus obligé de croire les archives sur parole : vous pouvez les construire vous-même, à partir du tag signé, et comparer.
@@ -148,7 +156,7 @@ git checkout v3.0.0
 sh files/scripts/release.sh
 ```
 
-`git verify-tag` vérifie que le tag a été signé par la clé ci-dessus. `files/scripts/release.sh` ensuite :
+`git verify-tag` vérifie que le tag a été signé par la clé ci-dessus ; il affiche le même avertissement sur la certification, pour la même raison. `files/scripts/release.sh` ensuite :
 
 * télécharge les archives officielles d'Electron indiquées dans `files/scripts/builder.py`, et les vérifie contre la liste des sommes de contrôle d'Electron ;
 * refuse de construire si `files/src` ou `files/res` diffèrent en quoi que ce soit du commit ;

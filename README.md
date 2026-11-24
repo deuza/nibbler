@@ -136,6 +136,14 @@ sha256sum -c --ignore-missing SHA256SUMS
 
 `gpg --verify` must report a good signature from `root@deuza.net`, made by the key whose fingerprint is shown above, and `sha256sum` must report `OK` for the archive you downloaded. On Windows, `Get-FileHash nibbler-3.0.0-windows.zip -Algorithm SHA256` in PowerShell gives the checksum to compare with the line of `SHA256SUMS`, and Gpg4win provides `gpg`.
 
+gpg may add a warning that the key "is not certified with a trusted signature". It does not concern the signature, which is valid: it means that nothing on your machine yet states that this key really belongs to the maintainer, since anyone can create a key with any name. That is what the fingerprint is for. Compare the one shown by gpg with the one above, which is also given in the release notes. If they match and you have an OpenPGP key of your own, you can certify this key on your machine only, and the warning goes away:
+
+```bash
+gpg --lsign-key F04C74F366250DE2A3091E46A91AD62A5CB89279
+```
+
+Without a key of your own, the warning stays; once the fingerprint has been checked, it can be ignored.
+
 ## Build it yourself
 
 You don't have to take the archives on trust either: you can build them yourself, from the signed tag, and compare.
@@ -148,7 +156,7 @@ git checkout v3.0.0
 sh files/scripts/release.sh
 ```
 
-`git verify-tag` checks that the tag was signed by the key above. `files/scripts/release.sh` then:
+`git verify-tag` checks that the tag was signed by the key above; it shows the same warning about certification, for the same reason. `files/scripts/release.sh` then:
 
 * downloads the official Electron archives named in `files/scripts/builder.py`, and checks them against Electron's own list of checksums;
 * refuses to build if `files/src` or `files/res` differ in any way from the commit;
