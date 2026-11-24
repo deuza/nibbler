@@ -11,7 +11,7 @@ ok() {
 }
 
 WORKDIR="/tmp/nibbler-install"
-VERSION="2.5.8"
+VERSION="3.0.0"
 ELECTRON_VERSION="44.11.5"
 
 ARCH="$(uname -m)"
@@ -35,7 +35,7 @@ mkdir -p "$WORKDIR"
 cd "$WORKDIR"
 
 msg "Downloading nibbler v${VERSION}..."
-curl -# -fL -O "https://github.com/rooklift/nibbler/archive/refs/tags/v${VERSION}.zip"
+curl -# -fL -O "https://github.com/deuza/nibbler/archive/refs/tags/v${VERSION}.zip"
 unzip -q "v${VERSION}.zip"
 NIBBLER="nibbler-${VERSION}"
 [[ -d "$NIBBLER" ]] || { msg "Failed to fetch nibbler..."; exit 1; }
@@ -44,6 +44,12 @@ ok "Fetched nibbler!"
 msg "Downloading electron v${ELECTRON_VERSION}..."
 ELECTRON_ZIP="electron-v${ELECTRON_VERSION}-darwin-${ELECTRON_ARCH}.zip"
 curl -# -fL -O "https://github.com/electron/electron/releases/download/v${ELECTRON_VERSION}/${ELECTRON_ZIP}"
+
+# Check the archive against Electron's own SHASUMS256.txt, whose lines read "<hash> *<name>".
+curl -fsSL -O "https://github.com/electron/electron/releases/download/v${ELECTRON_VERSION}/SHASUMS256.txt"
+awk -v name="$ELECTRON_ZIP" '{ n = $2; sub(/^\*/, "", n); if (n == name) print $1 "  " n }' SHASUMS256.txt |
+	shasum -a 256 -c - || { msg "Electron archive does not match its SHASUMS256.txt..."; exit 1; }
+ok "Verified electron!"
 
 mkdir -p electron
 cd electron
@@ -62,7 +68,7 @@ cp -R "$WORKDIR/nibbler-${VERSION}/files/src" "$APP_ROOT"
 PLIST="$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Nibbler" "$PLIST"
 /usr/libexec/PlistBuddy -c "Set :CFBundleName Nibbler" "$PLIST"
-/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.rooklift.nibbler" "$PLIST"
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.deuza.nibbler" "$PLIST"
 
 mv "$APP" "$WORKDIR/electron/Nibbler.app"
 ok "Built Nibbler.app!"

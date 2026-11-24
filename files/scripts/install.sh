@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
-BASE_URL="https://github.com/rooklift/nibbler"
+BASE_URL="https://github.com/deuza/nibbler"
 
 # check curl
 if ! which curl 1>/dev/null 2>&1 ; then
     echo "Please install curl and make sure it's added to \$PATH"
+    echo "Aborting"
+    exit 1
+fi
+
+# check sha256sum, used to verify the download
+if ! which sha256sum 1>/dev/null 2>&1 ; then
+    echo "Please install sha256sum (coreutils) and make sure it's added to \$PATH"
     echo "Aborting"
     exit 1
 fi
@@ -16,32 +23,42 @@ echo "You are installing Nibbler"
 # get the latest release version
 VERSION=$(curl -fs -o /dev/null -w "%{redirect_url}" "${BASE_URL}/releases/latest" | xargs basename)
 echo "Latest release is ${VERSION}"
-ZIP_NAME="nibbler-${VERSION#v}-linux.zip"
-ZIP_URL="${BASE_URL}/releases/download/${VERSION}/${ZIP_NAME}"
+ARCHIVE_NAME="nibbler-${VERSION#v}-linux.tar.gz"
+ARCHIVE_URL="${BASE_URL}/releases/download/${VERSION}/${ARCHIVE_NAME}"
+SUMS_URL="${BASE_URL}/releases/download/${VERSION}/SHA256SUMS"
 
 # create and enter temp dir
 TEMP_DIR=$(mktemp -d)
 cd "${TEMP_DIR}"
 
 # download
-echo "Downloading release from ${ZIP_URL}"
-if curl -fOL "${ZIP_URL}"; then
-    echo "Successfully downloaded ${ZIP_NAME}"
+echo "Downloading release from ${ARCHIVE_URL}"
+if curl -fOL "${ARCHIVE_URL}" && curl -fsSL -o SHA256SUMS "${SUMS_URL}"; then
+    echo "Successfully downloaded ${ARCHIVE_NAME} and SHA256SUMS"
 else
-    echo "Failed to download ${ZIP_NAME}"
+    echo "Failed to download ${ARCHIVE_NAME} or SHA256SUMS"
+    echo "Exiting"
+    exit 1
+fi
+
+# verify: the archive must match its line in the SHA256SUMS of the release
+if awk -v name="${ARCHIVE_NAME}" '$2 == name' SHA256SUMS | sha256sum -c -; then
+    echo "Checksum verified"
+else
+    echo "${ARCHIVE_NAME} does not match the SHA256SUMS of the release"
     echo "Exiting"
     exit 1
 fi
 
 # extract
 echo "Extracting..."
-unzip -q "${ZIP_NAME}"
+tar -xzf "${ARCHIVE_NAME}"
 echo "Successfully extracted Nibbler"
-UNZIPPED_NAME="${ZIP_NAME%.zip}"
+EXTRACTED_NAME="${ARCHIVE_NAME%.tar.gz}"
 
 # prepare
-chmod +x "${UNZIPPED_NAME}/nibbler"
-mv "${UNZIPPED_NAME}/resources/"{nibbler.png,nibbler.svg,linux} ./
+chmod +x "${EXTRACTED_NAME}/nibbler"
+mv "${EXTRACTED_NAME}/resources/"{nibbler.png,nibbler.svg,linux} ./
 
 # check if already installed
 INSTALL_DIR="/opt/nibbler"
@@ -75,7 +92,7 @@ for FILE in "${INSTALL_DIR}" "${BIN_SYMLINK_PATH}" "${DESKTOP_ENTRY_PATH}" \
 done
 
 # install new
-sudo mv "${UNZIPPED_NAME}" "${INSTALL_DIR}"
+sudo mv "${EXTRACTED_NAME}" "${INSTALL_DIR}"
 sudo ln -s "${INSTALL_DIR}/nibbler" "${BIN_SYMLINK_PATH}"
 sed -i "s|^Exec=.*|Exec=nibbler --no-sandbox|" "linux/nibbler.desktop"
 sudo mv "linux/nibbler.desktop" "${DESKTOP_ENTRY_PATH}"
